@@ -27,6 +27,22 @@
         @endif
     </header>
 
+    {{-- Affichage de la photo du post --}}
+    @if ($post->image)
+        <a href="{{ url('/posts/' . $post->id) }}">
+            <img src="{{ Storage::url($post->image) }}" alt="{{ $post->title ?? 'Photo du post' }}"
+                class="w-full rounded-md mb-4 object-cover max-h-64">
+        </a>
+    @endif
+
+    <div class="mb-4">
+        <a href="{{ url('/posts/' . $post->id) }}">
+            <p class="text-gray-700 dark:text-gray-300">
+                {{ $post->content }}
+            </p>
+        </a>
+    </div>
+
     <div class="mb-4">
         <a href="{{ url('/posts/' . $post->id) }}">
             <p class="text-gray-700 dark:text-gray-300">

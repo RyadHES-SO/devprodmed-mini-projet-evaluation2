@@ -33,8 +33,8 @@
                 @endif
             </p>
         </header>
-
-        <form method="POST" action="{{ url('/posts/' . $post->id) }}">
+        {{-- ajout de enctype pour l'upload --}}
+        <form method="POST" action="{{ url('/posts/' . $post->id) }}" enctype="multipart/form-data">
             @csrf
             @method('PATCH')
 
@@ -58,6 +58,25 @@
                     placeholder="{{ __('ui.posts.form.fields.content.placeholder') }}"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 dark:focus:ring-purple-500 focus:border-transparent @error('content') border-red-500 focus:ring-red-500 @else border-gray-300 dark:border-gray-600 focus:ring-teal-500 dark:focus:ring-purple-500 @enderror">{{ old('content', $post->content) }}</textarea>
                 @error('content')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Nouveau champ pour afficher la photo actuelle et permettre de la changer --}}
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Photo actuelle
+                </label>
+                <img src="{{ Storage::url($post->image) }}" alt="Photo du post"
+                    class="w-48 h-48 object-cover rounded-md mb-2">
+
+                <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Changer la photo (optionnel)
+                </label>
+                <input id="image" type="file" name="image" accept="image/*"
+                    class="w-full px-3 py-2 border rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+        @error('image') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror">
+                @error('image')
                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>

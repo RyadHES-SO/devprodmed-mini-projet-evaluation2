@@ -17,8 +17,8 @@
                 {{ __('ui.posts.create.description', ['app_name' => config('app.name')]) }}
             </p>
         </header>
-
-        <form method="POST" action="{{ url('/posts') }}">
+        <!-- ajout de enctype pour permettre -->
+        <form method="POST" action="{{ url('/posts') }}" enctype="multipart/form-data">
             @csrf
 
             <div class="mb-4">
@@ -41,6 +41,19 @@
                     placeholder="{{ __('ui.posts.form.fields.content.placeholder') }}"
                     class="w-full px-3 py-2 border rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:border-transparent @error('content') border-red-500 focus:ring-red-500 @else border-gray-300 dark:border-gray-600 focus:ring-teal-500 dark:focus:ring-purple-500 @enderror">{{ old('content') }}</textarea>
                 @error('content')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            
+            <!-- Nouveau champ pour afficher la photo actuelle -->
+            <div class="mb-6">
+                <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Photo
+                    *</label>
+                <input id="image" type="file" name="image" accept="image/*"
+                    class="w-full px-3 py-2 border rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                @error('image') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror">
+                @error('image')
                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>

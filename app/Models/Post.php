@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Post extends Model
 {
+    // Liste des champs qu'on a le droit de modifier
+    protected $fillable = ['title', 'content', 'image', 'user_id'];
+    
     /**
      * Get the user that owns the post.
      */
