@@ -62,6 +62,11 @@
         </header>
 
         <div class="mb-4">
+
+            {{-- Affichage de la photo --}}
+            <img src="{{ Storage::url($post->image) }}" alt="{{ $post->title ?? 'Photo du post' }}"
+                class="w-full rounded-md mb-4 object-cover max-h-[600px]">
+
             <p class="mt-4 dark:text-gray-300">
                 {{ $post->content }}
             </p>

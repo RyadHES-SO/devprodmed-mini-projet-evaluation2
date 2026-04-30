@@ -6,6 +6,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;//import de storage
 
 class PostController extends Controller
 {
@@ -35,13 +36,22 @@ class PostController extends Controller
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
             'content' => 'required|string|max:5000',
+            'image'   => 'required|image|max:8192', // obligatoire, fichier image, 8 Mo maximum
         ]);
+
+        // récupère le fichier uploadé
+        $file = $request->file('image');
+
+        // enregistre le fichier dans storage/app/public/post-images/ et retourne son chemin relatif
+        $path = Storage::disk('public')->put('post-images', $file);
+
 
         $user = $request->user();
         $post = new Post();
 
         $post->title = $validated['title'];
         $post->content = $validated['content'];
+        $post->image   = $path; // stocke le chemin vers le fichier
         $post->user()->associate($user);
 
         $post->save();
@@ -92,11 +102,23 @@ class PostController extends Controller
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
             'content' => 'required|string|max:5000',
+            'image'   => 'nullable|image|max:8192', // nullable = pas obligatoire de changer la photo si on modifie
         ]);
 
         $post = Post::findOrFail($id);
 
         Gate::authorize('update', $post);
+
+        $file = $request->file('image');
+
+        if ($file) {
+            // Supprime l'ancienne image pour ne pas remplir le disque inutilement
+            if ($post->image && Storage::disk('public')->exists($post->image)) {
+                Storage::disk('public')->delete($post->image);
+            }
+
+            $post->image = Storage::disk('public')->put('post-images', $file);
+        }
 
         $post->title = $validated['title'];
         $post->content = $validated['content'];
@@ -114,6 +136,11 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
 
         Gate::authorize('delete', $post);
+
+        // Supprime le fichier image avant de supprimer le post
+        if ($post->image && Storage::disk('public')->exists($post->image)) {
+            Storage::disk('public')->delete($post->image);
+        }
 
         $post->delete();
 
