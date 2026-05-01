@@ -43,14 +43,6 @@
         </a>
     </div>
 
-    <div class="mb-4">
-        <a href="{{ url('/posts/' . $post->id) }}">
-            <p class="text-gray-700 dark:text-gray-300">
-                {{ $post->content }}
-            </p>
-        </a>
-    </div>
-
     <footer class="pt-4 border-t border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
             <a href="{{ url('/posts/' . $post->id) }}" class="font-semibold">
