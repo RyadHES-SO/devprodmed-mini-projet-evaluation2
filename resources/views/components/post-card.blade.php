@@ -46,7 +46,7 @@
     <footer class="pt-4 border-t border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
             <a href="{{ url('/posts/' . $post->id) }}" class="font-semibold">
-                {{ trans_choice('ui.posts.likes_count', count($post->likes)) }}
+                ⭐ {{ $post->averageRating() }}/5 ({{ $post->ratings()->count() }} votes)
             </a>
             <a href="{{ url('/posts/' . $post->id) }}"
                 class="px-4 py-2 bg-teal-600 dark:bg-purple-900 text-white rounded-md hover:bg-teal-700 dark:hover:bg-purple-800">

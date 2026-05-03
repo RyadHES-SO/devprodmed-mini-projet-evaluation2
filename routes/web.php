@@ -8,10 +8,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TokenController;
 use App\Models\Post;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RatingController;
 
 Route::get('/', function () {
-    $posts = Post::orderBy('created_at', 'desc')->with('user')->with('likes')->limit(3)->get();
-
+    $posts = Post::orderBy('created_at', 'desc')->with('user')->with('ratings')->limit(3)->get();
     return view('home', ['posts' => $posts]);
 });
 
@@ -26,7 +26,9 @@ Route::resource('posts', PostController::class)->only(['index', 'show']);
 
 Route::singleton('my-profile', MyProfileController::class)->destroyable()->middleware('auth');
 
-Route::match(['put', 'patch'], '/likes/{post}', [LikeController::class, 'update'])->middleware('auth');
+//Route::match(['put', 'patch'], '/likes/{post}', [LikeController::class, 'update'])->middleware('auth');
+Route::post('/ratings/{post}', [RatingController::class, 'store'])->middleware('auth');
+Route::delete('/ratings/{post}', [RatingController::class, 'destroy'])->middleware('auth');
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('/auth/register', 'showRegister');
