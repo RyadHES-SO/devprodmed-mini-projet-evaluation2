@@ -62,14 +62,69 @@
         </header>
 
         <div class="mb-4">
-
             {{-- Affichage de la photo --}}
             <img src="{{ Storage::url($post->image) }}" alt="{{ $post->title ?? 'Photo du post' }}"
-                class="w-full rounded-md mb-4 object-cover max-h-[600px]">
+                class="w-full rounded-md object-cover max-h-[600px]">
 
-            <p class="mt-4 dark:text-gray-300">
-                {{ $post->content }}
-            </p>
+            {{-- Menu déroulant EXIF, affiché seulement s'il y a des données --}}
+            @if ($post->exif_data && count(array_filter($post->exif_data)) > 0)
+                <details class="mt-1 mb-4 border border-gray-200 dark:border-gray-600 rounded-b-md overflow-hidden">
+                    <summary
+                        class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 select-none">
+                        Détails de la photo
+                    </summary>
+
+                    <div class="px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm bg-gray-50 dark:bg-slate-700">
+
+                        @if (isset($post->exif_data['width']) && isset($post->exif_data['height']))
+                            <div class="text-gray-500 dark:text-gray-400">Dimensions</div>
+                            <div class="dark:text-white font-medium">
+                                {{ $post->exif_data['width'] }}x{{ $post->exif_data['height'] }}px
+                            </div>
+                        @endif
+
+                        @if (isset($post->exif_data['file_size']))
+                            <div class="text-gray-500 dark:text-gray-400">Taille</div>
+                            <div class="dark:text-white font-medium">{{ $post->exif_data['file_size'] }} Mo</div>
+                        @endif
+
+                        @if (isset($post->exif_data['camera_make']) || isset($post->exif_data['camera_model']))
+                            <div class="text-gray-500 dark:text-gray-400">Appareil</div>
+                            <div class="dark:text-white font-medium">
+                                {{ trim(($post->exif_data['camera_make'] ?? '') . ' ' . ($post->exif_data['camera_model'] ?? '')) }}
+                            </div>
+                        @endif
+
+                        @if (isset($post->exif_data['lens']))
+                            <div class="text-gray-500 dark:text-gray-400">Objectif</div>
+                            <div class="dark:text-white font-medium">{{ $post->exif_data['lens'] }}</div>
+                        @endif
+
+                        @if (isset($post->exif_data['focal_length']))
+                            <div class="text-gray-500 dark:text-gray-400">Focale</div>
+                            <div class="dark:text-white font-medium">{{ $post->exif_data['focal_length'] }}mm</div>
+                        @endif
+
+                        @if (isset($post->exif_data['iso']))
+                            <div class="text-gray-500 dark:text-gray-400">ISO</div>
+                            <div class="dark:text-white font-medium">{{ $post->exif_data['iso'] }}</div>
+                        @endif
+
+                        @if (isset($post->exif_data['shutter_speed']))
+                            <div class="text-gray-500 dark:text-gray-400">Vitesse</div>
+                            <div class="dark:text-white font-medium">{{ $post->exif_data['shutter_speed'] }}s</div>
+                        @endif
+
+                        @if (isset($post->exif_data['aperture']))
+                            <div class="text-gray-500 dark:text-gray-400">Ouverture</div>
+                            <div class="dark:text-white font-medium">f/{{ $post->exif_data['aperture'] }}</div>
+                        @endif
+
+                    </div>
+                </details>
+            @endif
+
+            <p class="mt-4 dark:text-gray-300">{{ $post->content }}</p>
         </div>
 
         <footer class="pt-4 border-t border-gray-200 dark:border-gray-700">
