@@ -56,7 +56,7 @@
                 @endcan
                 ·
                 <span class="font-semibold">
-                    {{ trans_choice('ui.posts.likes_count', count($post->likes)) }}
+                    ⭐ {{ $post->averageRating() }}/5 ({{ $post->ratings()->count() }} votes)
                 </span>
             </p>
         </header>
@@ -128,66 +128,66 @@
         </div>
 
         <footer class="pt-4 border-t border-gray-200 dark:border-gray-700">
-            @auth
-                <form method="POST" action="{{ url('/likes/' . $post->id) }}" class="mb-4">
-                    @csrf
-                    @method('PUT')
-                    <div class="flex flex-wrap justify-between gap-2">
-                        <button type="submit" name="reaction" value="like"
-                            class="w-12 h-12 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer {{ $reaction === 'like' ? 'ring-2 ring-teal-600 dark:ring-purple-900' : '' }}">
-                            👍
-                        </button>
-                        <button type="submit" name="reaction" value="love"
-                            class="w-12 h-12 rounded-full cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 {{ $reaction === 'love' ? 'ring-2 ring-teal-600 dark:ring-purple-900' : '' }}">
-                            ❤️
-                        </button>
-                        <button type="submit" name="reaction" value="haha"
-                            class="w-12 h-12 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer {{ $reaction === 'haha' ? 'ring-2 ring-teal-600 dark:ring-purple-900' : '' }}">
-                            😂
-                        </button>
-                        <button type="submit" name="reaction" value="wow"
-                            class="w-12 h-12 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer {{ $reaction === 'wow' ? 'ring-2 ring-teal-600 dark:ring-purple-900' : '' }}">
-                            😮
-                        </button>
-                        <button type="submit" name="reaction" value="sad"
-                            class="w-12 h-12 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer {{ $reaction === 'sad' ? 'ring-2 ring-teal-600 dark:ring-purple-900' : '' }}">
-                            😢
-                        </button>
-                        <button type="submit" name="reaction" value="angry"
-                            class="w-12 h-12 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer {{ $reaction === 'angry' ? 'ring-2 ring-teal-600 dark:ring-purple-900' : '' }}">
-                            😡
-                        </button>
-                    </div>
-                </form>
-            @endauth
-            <ul class="flex flex-wrap gap-2">
-                @forelse ($post->likes as $user)
-                    <li class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-                        <a href="{{ url('@' . $user->username) }}" class="font-semibold hover:underline">
-                            {{ '@' . $user->username }}
-                        </a>
-                        <span>
-                            @if ($user->pivot->reaction === 'like')
-                                👍
-                            @elseif($user->pivot->reaction === 'love')
-                                ❤️
-                            @elseif($user->pivot->reaction === 'haha')
-                                😂
-                            @elseif($user->pivot->reaction === 'wow')
-                                😮
-                            @elseif($user->pivot->reaction === 'sad')
-                                😢
-                            @elseif($user->pivot->reaction === 'angry')
-                                😡
-                            @endif
+
+            {{-- Affichage de la note moyenne --}}
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex gap-1">
+                    @for ($i = 1; $i <= 5; $i++)
+                        <span
+                            class="text-2xl {{ $i <= $post->averageRating() ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}">
+                            ★
                         </span>
-                    </li>
-                @empty
-                    <span class="text-sm text-gray-600 dark:text-gray-400">
-                        {{ trans_choice('ui.posts.likes_count', 0) }}
-                    </span>
-                @endforelse
-            </ul>
+                    @endfor
+                </div>
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ $post->averageRating() }}/5
+                    ({{ $post->ratings()->count() }}
+                    {{ $post->ratings()->count() === 1 ? 'vote' : 'votes' }})
+                </span>
+            </div>
+
+            @auth
+                @can('create', [App\Models\Rating::class, $post])
+                    {{-- Formulaire pour soumettre ou changer sa note --}}
+                    <form method="POST" action="{{ url('/ratings/' . $post->id) }}" class="mb-4">
+                        @csrf
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ $userRating ? 'Votre note : ' . $userRating->stars . '/5 — Modifier :' : 'Noter cette photo :' }}
+                        </p>
+                        <div class="flex gap-2 items-center">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <button type="submit" name="stars" value="{{ $i }}"
+                                    class="text-3xl cursor-pointer hover:scale-110 transition-transform
+                            {{ $userRating && $userRating->stars >= $i ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}">
+                                    ★
+                                </button>
+                            @endfor
+                        </div>
+                    </form>
+
+                    {{-- Bouton pour supprimer sa note si elle existe --}}
+                    @if ($userRating)
+                        <form method="POST" action="{{ url('/ratings/' . $post->id) }}" class="mb-4">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-sm text-red-500 hover:underline cursor-pointer">
+                                Supprimer ma note
+                            </button>
+                        </form>
+                    @endif
+                @else
+                    {{-- Message si c'est son propre post --}}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 italic">
+                        Vous ne pouvez pas noter votre propre photo.
+                    </p>
+                @endcan
+            @else
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    <a href="{{ url('/auth/login') }}" class="underline">Connectez-vous</a>
+                    pour noter cette photo.
+                </p>
+            @endauth
+
         </footer>
     </article>
 </x-default-layout>

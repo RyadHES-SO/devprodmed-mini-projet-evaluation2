@@ -15,7 +15,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::orderBy('created_at', 'desc')->with('user')->with('likes')->get();
+        $posts = Post::orderBy('created_at', 'desc')->with('user')->with('ratings')->get();
 
         return view('posts.index', ['posts' => $posts]);
     }
@@ -189,22 +189,20 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        $post = Post::with('user')->with('likes')->findOrFail($id);
+        $post = Post::with('user')->with('ratings')->findOrFail($id);
 
         $user = Auth::user();
-        $reaction = null;
+        $userRating = null;
 
         if ($user) {
-            $reaction = $post->likes()->where('user_id', $user->id)->first();
-
-            // Vérifie si la personne a déjà liké ce post
-            if ($reaction) {
-                // Récupère la réaction au post
-                $reaction = $reaction->pivot->reaction;
-            }
+            // Récupère la note de l'utilisateur connecté pour ce post
+            $userRating = $post->ratings()->where('user_id', $user->id)->first();
         }
 
-        return view('posts.show', ['post' => $post, 'reaction' => $reaction]);
+        return view('posts.show', [
+            'post'       => $post,
+            'userRating' => $userRating,
+        ]);
     }
 
     /**
